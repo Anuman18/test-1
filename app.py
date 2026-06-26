@@ -11,10 +11,12 @@ from flask import (
     Flask, render_template, request,
     jsonify, send_from_directory, url_for, send_file
 )
+from flask_cors import CORS
 
 from config import Config
 
 app = Flask(__name__)
+CORS(app)
 app.config.from_object(Config)
 Config.init_app(app)
 
@@ -103,7 +105,6 @@ def capture():
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         unique_id = uuid.uuid4().hex[:8]
         
-        # FIX: Save as .jpg for lightning fast disk-writing
         filename = f"photo_{timestamp}_{unique_id}.jpg"
         output_path = os.path.join(Config.OUTPUTS_FOLDER, filename)
         final.convert("RGB").save(output_path, "JPEG", quality=95)
@@ -136,6 +137,7 @@ def capture():
         logger.exception("Capture error: %s", exc)
         return jsonify({"error": str(exc)}), 500
 
+
 @app.route("/outputs/<filename>")
 def serve_output(filename):
     return send_from_directory(Config.OUTPUTS_FOLDER, filename)
@@ -144,6 +146,11 @@ def serve_output(filename):
 @app.route("/qrcodes/<filename>")
 def serve_qrcode(filename):
     return send_from_directory(Config.QRCODES_FOLDER, filename)
+
+
+@app.route("/download/<filename>")
+def download_file(filename):
+    return send_from_directory(Config.OUTPUTS_FOLDER, filename, as_attachment=True)
 
 
 if __name__ == "__main__":
