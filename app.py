@@ -126,12 +126,12 @@ def capture():
         qr.make_image(fill_color="#1a1a1a", back_color="white").save(qr_path)
         
         return jsonify({
-            "success": True,
-            "filename": filename,
-            "photo_url": url_for("serve_output", filename=filename),
-            "download_url": download_url,
-            "qr_url":    url_for("serve_qrcode", filename=filename),
-        })
+    "success": True,
+    "filename": filename,
+    "photo_url": url_for("serve_output", filename=filename),
+    "download_url": download_url,
+    "qr_url": url_for("serve_qrcode", filename=qr_filename),  # ✅ qr_filename
+})
 
     except Exception as exc:
         logger.exception("Capture error: %s", exc)
