@@ -2,6 +2,7 @@ import os
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
+IS_RENDER = os.environ.get("RENDER", False)
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "photobooth-secret-2026")
@@ -9,8 +10,14 @@ class Config:
 
     STATIC_FOLDER  = os.path.join(BASE_DIR, "static")
     LAYOUTS_FOLDER = os.path.join(STATIC_FOLDER, "layouts")
-    OUTPUTS_FOLDER = os.path.join(STATIC_FOLDER, "outputs")
-    QRCODES_FOLDER = os.path.join(STATIC_FOLDER, "qrcodes")
+
+    # Render pe /tmp use karo, local pe static/ folder
+    if IS_RENDER:
+        OUTPUTS_FOLDER = "/tmp/outputs"
+        QRCODES_FOLDER = "/tmp/qrcodes"
+    else:
+        OUTPUTS_FOLDER = os.path.join(STATIC_FOLDER, "outputs")
+        QRCODES_FOLDER = os.path.join(STATIC_FOLDER, "qrcodes")
 
     LAYOUT_TOP    = os.path.join(LAYOUTS_FOLDER, "layout_top.png")
     LAYOUT_BOTTOM = os.path.join(LAYOUTS_FOLDER, "layout_bottom.png")

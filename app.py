@@ -40,8 +40,9 @@ def layout_image(name):
 def get_gallery():
     try:
         files = [f for f in os.listdir(Config.OUTPUTS_FOLDER) if f.endswith(".jpg")]
-        files.sort(key=lambda x: os.path.getmtime(os.path.join(Config.OUTPUTS_FOLDER, x)), reverse=True)
-        urls = [url_for("static", filename=f"outputs/{f}") for f in files[:10]]
+        files.sort(key=lambda x: os.path.getmtime(
+            os.path.join(Config.OUTPUTS_FOLDER, x)), reverse=True)
+        urls = [url_for("serve_output", filename=f) for f in files[:10]]
         return jsonify({"photos": urls})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -126,19 +127,23 @@ def capture():
         return jsonify({
             "success": True,
             "filename": filename,
-            "photo_url": url_for("static", filename=f"outputs/{filename}"),
+            "photo_url": url_for("serve_output", filename=filename),
             "download_url": download_url,
-            "qr_url": url_for("static", filename=f"qrcodes/{qr_filename}"),
+            "qr_url":    url_for("serve_qrcode", filename=filename),
         })
 
     except Exception as exc:
         logger.exception("Capture error: %s", exc)
         return jsonify({"error": str(exc)}), 500
 
+@app.route("/outputs/<filename>")
+def serve_output(filename):
+    return send_from_directory(Config.OUTPUTS_FOLDER, filename)
 
-@app.route("/download/<filename>")
-def download_file(filename):
-    return send_from_directory(Config.OUTPUTS_FOLDER, filename, as_attachment=True)
+
+@app.route("/qrcodes/<filename>")
+def serve_qrcode(filename):
+    return send_from_directory(Config.QRCODES_FOLDER, filename)
 
 
 if __name__ == "__main__":
